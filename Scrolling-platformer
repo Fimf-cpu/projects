@@ -1,0 +1,105 @@
+import pygame
+
+pygame.init()
+screen = pygame.display.set_mode((800, 600))
+pygame.display.set_caption('Side-Scrolling Game')
+clock = pygame.time.Clock()
+player =[100, 450, 0, 0] #x,y,xv,yv
+isOnGround = False
+offset = 0
+platforms = [(500,400), (700,300)]
+
+def draw_clouds():
+    for x in range(100, 800, 300,):
+        for i in range(3):
+            pygame.draw.circle(screen, (255,255,255), (x + offset, 100), 40)
+            pygame.draw.circle(screen, (255,255,255), (x-50 + offset, 125), 40)
+            pygame.draw.circle(screen, (255,255,255), (x+50 + offset, 125), 40)
+            pygame.draw.rect(screen, (255,255,255), (x-50 + offset, 100, 100, 65))
+        
+def draw_tree():
+    for x in range(100, 800, 300):
+        for i in range (3):
+            pygame.draw.rect(screen, (50,50,0), (x-9 + offset, 250, 15, 500))
+            pygame.draw.circle(screen, (0,150,0), (x + offset, 250), 40)
+            pygame.draw.circle(screen, (0,150,0), (x-35 + offset, 290), 40)
+            pygame.draw.circle(screen, (0,150,0), (x+35 + offset, 290), 40)
+            
+            
+def move_player():
+    global isOnGround
+    global offset
+    
+    for i in range(len(platforms)):
+        if player[1]+5>platforms[i][1]+offset and player[0]<platforms[i][1]+100+offset and player[1]+50>platforms[i][1] and player[1]+50< platforms[i][1]+50:
+            isOnGround = True
+            player[1]=platforms[i][1]-50
+            player[3] = 0
+            
+        if player[0]+5>platforms[i][0]+offset and player[0]<platforms[i][0]+100+offset and player[1]+50>platforms[i][1] and player[1]+50< platforms[i][1]+50:
+            isOnGround = True
+            player[1]=platforms[i][1]-50
+            player[3] = 0
+    
+    if keys[pygame.K_LEFT]:
+        if offset > 260 and player[0]>0:
+            player[2] = -5
+        elif player[0]>400 and offset < -1500:
+            player[2] = -5
+        elif player[0]>0:
+            offset += 5
+            player[2] = 0
+        else:
+            player[2]=0
+    elif keys[pygame.K_RIGHT]:
+        if offset < 760 and player[0]<0:
+            player[2] = +5
+        elif player[0]<400 and offset < 1500:
+            player[2] = +5
+        elif player[0]>0:
+            offset += -5
+            player[2] = 0
+        else:
+            player[2]=0
+    else:
+        player[2] = 0
+    
+    if isOnGround == False:
+        player[3] +=1
+    
+    if player[1] > 450:
+        player[1] = 450
+        isOnGround = True
+    if isOnGround == True and keys[pygame.K_UP]:
+        player[3] = -15
+        isOnGround = False
+    
+    player[0]+=player[2]
+    player[1]+=player[3]
+    
+def draw_platforms():
+    for i in range(len(platforms)):
+        pygame.draw.rect(screen, (50, 10, 10), (platforms[i][0] + offset, platforms[i][1], 100, 30))
+    
+
+
+running = True
+while running:# main gameloop---------------------------------------------
+    clock.tick(60)
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+            
+        keys = pygame.key.get_pressed()
+    #physics--------------------------------------------------------------
+    move_player()
+    #Render---------------------------------------------------------------
+    screen.fill((135,206,235))
+    draw_clouds()
+    draw_tree()
+    draw_platforms()
+    pygame.draw.rect(screen,(255,0,255), (player[0], player[1], 50, 50))
+    pygame.draw.rect(screen, (0,150,0), (0,515,1800,100))
+    pygame.display.flip()
+
+pygame.quit()
