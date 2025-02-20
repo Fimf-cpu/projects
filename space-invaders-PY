@@ -1,0 +1,95 @@
+#Dean.k|2/20/25 + 
+import pygame
+
+pygame.init()
+pygame.display.set_caption("space invaders!")
+gamescreen = pygame.display.set_mode((800,800))
+FPS = pygame.time.Clock()
+fail = False
+timer = 0;
+
+#PLAYER variables
+xpos = 400
+ypos = 750
+vx = 0
+moveleft = False
+moveright = False
+
+class Alien:
+    def __init__(self, xpos, ypos):
+        self.xpos = xpos
+        self.ypos = ypos
+        self.isAlive = True
+        self.direction = 1
+    def draw(self):
+        pygame.draw.rect(gamescreen, (250, 250, 250), (self.xpos, self.ypos, 40, 40))
+    def move(self, time):
+        
+        if time % 800 == 0:
+            self.ypos += 100
+            self.direction *=-1
+            return 0
+        
+        
+        if time % 100 == 0:
+            self.xpos+=50*self.direction
+        
+        return time
+
+armada = []
+for i in range (4):
+    for j in range (9):
+        armada.append(Alien(j*80+50, i*80+50))
+
+#GAME LOOP----------------------------------------------------------
+while not fail:
+    FPS.tick(60)
+    
+    #INPUT section--------------------------------------->->->->->->
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            fail = True
+        
+        #left
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LEFT:
+                moveleft = True
+            if event.key == pygame.K_RIGHT:
+                moveright = True
+        
+        elif event.type == pygame.KEYUP:
+            if event.key == pygame.K_LEFT:
+                moveleft = False
+            if event.key == pygame.K_RIGHT:
+                moveright = False
+            
+    
+    #PHYSICS section-------------------------------------+-+-+-+-+-+
+    if moveleft == True:
+        vx =- 3
+    
+    elif moveright == True:
+        vx =+ 3
+    else:
+        vx = 0
+    
+    xpos += vx
+    
+    for i in range (len(armada)):
+        timer = armada[i].move(timer)
+    
+    #RENDER Section--------------------------------------=-=-=-=-=-=
+    
+    gamescreen.fill((0,0,0))
+    
+    pygame.draw.rect(gamescreen, (0, 200, 0), (xpos, ypos, 60, 20))
+    pygame.draw.rect(gamescreen, (0, 200, 0), (xpos+2, ypos-5, 55, 10))
+    pygame.draw.rect(gamescreen, (0, 200, 0), (xpos+25, ypos-15, 10, 30))
+    
+    for i in range (len(armada)):
+        armada[i].draw()
+    
+    pygame.display.flip()
+    
+#END GAME LOOP------------------------------------------------------
+pygame.quit()
