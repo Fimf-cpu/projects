@@ -1,4 +1,4 @@
-#Dean.k|2/20/25 + 
+#Dean.k|3/7/25
 import pygame
 
 pygame.init()
@@ -14,6 +14,55 @@ ypos = 750
 vx = 0
 moveleft = False
 moveright = False
+shoot = False
+
+class wall:
+    def __init__(self, xpos, ypos):
+        self.xpos = xpos
+        self.ypos = ypos
+        self.numhits = 0
+    
+    def draw (self):
+        if self.numhits ==0:
+            pygame.draw.rect(gamescreen, (250, 250, 0), (self.xpos, self.ypos, 30, 30))
+        if self.numhits ==1:
+            pygame.draw.rect(gamescreen, (150, 150, 0), (self.xpos, self.ypos, 30, 30))
+        if self.numhits ==2:
+            pygame.draw.rect(gamescreen, (50, 50, 0), (self.xpos, self.ypos, 30, 30))
+    def collide(self, BulletX, BulletY):
+        if self.numhits < 3:
+            if BulletX > self.xpos:
+                if BulletX < self.xpos + 30:
+                    if BulletY < self.ypos + 30:
+                        if BulletY > self.ypos:
+                            print("hit")
+                            self.numhits += 1
+                            return False
+
+walls = []
+for k in range (4):
+    for i in range (2):
+        for j in range (3):
+            walls.append(wall(j*30+200*k+50, i*30+600))
+
+class Bullet:
+    def __init__(self, xpos, ypos):
+        self.xpos = xpos
+        self.ypos = ypos
+        self.isalive = False
+    
+    def move(self, xpos, ypos):
+        if self.isalive == True:
+            self.ypos-=5
+        if self.ypos < 0:
+            self.isalive = False
+            self.xpos = xpos
+            self.ypos = ypos
+        
+    def draw(self):
+        pygame.draw.rect(gamescreen, (250, 250, 250), (self.xpos, self.ypos, 3, 20))
+
+bullet = Bullet(xpos+28, ypos)
 
 class Alien:
     def __init__(self, xpos, ypos):
@@ -35,7 +84,17 @@ class Alien:
             self.xpos+=50*self.direction
         
         return time
-
+    def collide(self, BulletX, BulletY):
+        if self.isAlive:
+            if BulletX > self.xpos:
+                if BulletX < self.xpos + 40:
+                    if BulletY < self.ypos + 40:
+                        if BulletY > self.ypos:
+                            print("hit")
+                            self.isAlive = False
+                            return False
+        return True
+        
 armada = []
 for i in range (4):
     for j in range (9):
@@ -44,24 +103,27 @@ for i in range (4):
 #GAME LOOP----------------------------------------------------------
 while not fail:
     FPS.tick(60)
+    timer+=1
     
     #INPUT section--------------------------------------->->->->->->
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             fail = True
         
-        #left
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
                 moveleft = True
             if event.key == pygame.K_RIGHT:
                 moveright = True
+            if event.key == pygame.K_SPACE:
+                shoot = True
         
         elif event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT:
                 moveleft = False
             if event.key == pygame.K_RIGHT:
                 moveright = False
+            
             
     
     #PHYSICS section-------------------------------------+-+-+-+-+-+
@@ -78,6 +140,26 @@ while not fail:
     for i in range (len(armada)):
         timer = armada[i].move(timer)
     
+    if shoot == True:
+        bullet.isalive = True
+    
+    if bullet.isalive == True:
+        bullet.move(xpos+28, ypos)
+        if bullet.isalive == True:
+            for i in range (len(armada)):
+                bullet.isalive = armada[i].collide(bullet.xpos, bullet.ypos)
+                if bullet.isalive == False:
+                    shoot = False
+                    break
+            for i in range (len(walls)):
+                bullet.isalive = walls[i].collide(bullet.xpos, bullet.ypos)
+                if bullet.isalive == False:
+                    shoot = False
+                    break
+    else:
+        bullet.xpos = xpos + 28
+        bullet.ypos = ypos
+    
     #RENDER Section--------------------------------------=-=-=-=-=-=
     
     gamescreen.fill((0,0,0))
@@ -87,7 +169,12 @@ while not fail:
     pygame.draw.rect(gamescreen, (0, 200, 0), (xpos+25, ypos-15, 10, 30))
     
     for i in range (len(armada)):
-        armada[i].draw()
+        if armada[i].isAlive == True:
+            armada[i].draw()
+    for j in range (len(walls)):
+        walls[j].draw()
+    
+    bullet.draw()
     
     pygame.display.flip()
     
