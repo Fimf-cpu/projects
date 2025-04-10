@@ -1,0 +1,142 @@
+#include <iostream>
+#include <algorithm>
+#include <ctime>
+using namespace std;
+
+int main() {
+	srand(time(NULL));
+	// game variables
+	bool MatchFound = false;
+	int PHandSize = 5;
+	int CHandSize = 5;
+	int NextDeckCard = 10;
+	bool HasCard = false;
+	int Playerscore = 0;
+	int computerscore = 0;
+	int turnNumber = 1;
+	int computerPick;
+	enum TURNS { player, computer };
+	int turn = player;
+	int quads = 0;
+	char match;
+	bool isEmpty = false;
+	string input;
+
+	string deck[52] = { "2 hearts, ","3 hearts, ", "4 hearts, ", "5 hearts, ", "6 hearts, ", "7 hearts, ", "8 hearts, ", "9 hearts, ", "10 hearts, ", "A hearts, ", "J hearts, ", "Q hearts, ", "K hearts, ", "2 Dimonds, ", "3 Dimonds, ", "4 Dimonds, ", "5 Dimonds, ", "6 Dimonds, ", "7 Dimonds, ", "8 Dimonds, ", "9 Dimonds, ", "10 Dimonds, ", "A Dimonds, ", "J Dimonds, ", "Q Dimonds, ", "K Dimonds, ", "2 Spades, ", "3 Spades, ", "4 Spades, ", "5 Spades, ", "6 Spades, ","7 Spades, ", "8 Spades, ", "9 Spades, ", "10 Spades, ", "A Spades, ", "J Spades, ", "Q Spades, ", "K  Spades, ", "2 clubs, ", "3 clubs, ", "4 clubs, ", "5 clubs, ", "6 clubs, ", "7 clubs, ", "8 clubs, ", "9 clubs, ", "10 clubs, ", "A clubs, ", "J clubs, ", "Q clubs, ", "K clubs, "};
+	random_shuffle(&deck[0], &deck[52]);
+	for (int i = 0; i < 52; i++) {
+		cout << deck[i];
+	}
+	string PlayerHand[52];
+	string ComputerHand[52];
+	for (int i = 0; i < 52; i++) {
+		PlayerHand[i] = "empty";
+		ComputerHand[i] = "empty";
+	}
+
+	for (int i = 0; i < 5; i++) {
+		PlayerHand[i] = deck[i];
+		deck[i] = "empty";
+	}
+	for (int i = 5; i < 10; i++) {
+		ComputerHand[i] = deck[i];
+		deck[i] = "empty";
+	}
+	cout << "Welcome to Go Fish!" << endl << endl;
+	while (Playerscore + computerscore < 52) {
+		//turn start
+		cout << "it is turn number " << turnNumber << endl;
+		if (turn == player) {
+			cout << "It is your turn" << endl;
+		}
+		else {
+			cout << "It is the computer's turn" << endl;
+		}
+		cout << "you have " << PHandSize << " cards in your hand, the computer has " << CHandSize << endl;
+		cout << "the scores are you: " << Playerscore << ", computer: " << computerscore << endl << endl;
+		system("pause");
+		cout << endl << endl;
+
+		switch (turn) {
+
+		case player:
+			cout << "your current hand: " << endl;
+			sort(PlayerHand, PlayerHand + 51);
+			for (int i = 0; i < 52; i++) {
+				if (PlayerHand[i] != "empty") {
+					cout << PlayerHand[i] << endl;
+				}
+			}
+			//////////////////////////////////////////////////////////////////
+		//cull any set of 4 is player hand
+			for (int i = 0; i < 52; i++) {
+				quads = 0; // this is a counter, resetting it here
+
+				for (int j = i + 1; j < 51; j++) {
+					if (PlayerHand[i].at(0) != 'e') {
+						if (PlayerHand[i].at(0) == PlayerHand[j].at(0)) {
+							quads++;
+							if (quads == 3) {
+								match = PlayerHand[i].at(0);
+								Playerscore++;
+								cout << "you got all 4! Culling cards and giving you a point" << endl;
+								for (int m = 0; m < 52; m++) {
+									if (PlayerHand[m].at(0) == match)
+										PlayerHand[m] = "empty";
+								}
+								cout << endl << "your new hand: " << endl;
+								for (int i = 0; i < 52; i++) {
+									if (PlayerHand[i].at(0) != 'e')
+										cout << PlayerHand[i] << endl;
+								}
+							}
+						}
+					}
+				}
+			}
+			cout << "your turn" << endl;
+			cin >> input;
+			cout << input[0] << endl;
+			for (int i = 0; i < 52; i++) {
+				if (PlayerHand[i][0] == input[0]) {
+					HasCard = true;
+				}
+			}
+			if (HasCard == false) {
+				cout << "NO CHEATING" << endl;
+				turn = computer;
+			}
+			else {
+				for (int i = 0; i < 52; i++) {
+					if (ComputerHand[i][0] == input[0]) {
+						cout << "you found a mach" << endl;
+						ComputerHand[i] = "empty";
+						CHandSize--;
+						MatchFound = true;
+					}
+					if (MatchFound == false) {
+						cout << "No Match found. GO FISH" << endl;
+						system("pause");
+						cout << "you grabbed a " << deck[NextDeckCard] << endl;
+						PlayerHand[PHandSize] = deck[NextDeckCard];
+						PHandSize++;
+						NextDeckCard++;
+						turn = computer;
+						turnNumber++;
+					}
+					else
+						MatchFound = false;
+				}
+			}
+			break;
+		case computer:
+			for (int i = 0; i < 52; i++) {
+				sort(ComputerHand, ComputerHand + 51);
+				if (ComputerHand[i] != "empty") {
+					cout << ComputerHand[i] << endl;
+				}
+			}
+			break;
+		}
+	}
+}
