@@ -21,6 +21,8 @@ int main() {
 	char match;
 	bool isEmpty = false;
 	string input;
+	int looking = 0;
+	bool notempty = false;
 
 	string deck[52] = { "2 hearts, ","3 hearts, ", "4 hearts, ", "5 hearts, ", "6 hearts, ", "7 hearts, ", "8 hearts, ", "9 hearts, ", "10 hearts, ", "A hearts, ", "J hearts, ", "Q hearts, ", "K hearts, ", "2 Dimonds, ", "3 Dimonds, ", "4 Dimonds, ", "5 Dimonds, ", "6 Dimonds, ", "7 Dimonds, ", "8 Dimonds, ", "9 Dimonds, ", "10 Dimonds, ", "A Dimonds, ", "J Dimonds, ", "Q Dimonds, ", "K Dimonds, ", "2 Spades, ", "3 Spades, ", "4 Spades, ", "5 Spades, ", "6 Spades, ","7 Spades, ", "8 Spades, ", "9 Spades, ", "10 Spades, ", "A Spades, ", "J Spades, ", "Q Spades, ", "K  Spades, ", "2 clubs, ", "3 clubs, ", "4 clubs, ", "5 clubs, ", "6 clubs, ", "7 clubs, ", "8 clubs, ", "9 clubs, ", "10 clubs, ", "A clubs, ", "J clubs, ", "Q clubs, ", "K clubs, "};
 	random_shuffle(&deck[0], &deck[52]);
@@ -126,17 +128,78 @@ int main() {
 					}
 					else
 						MatchFound = false;
+					break;
 				}
 			}
+			HasCard = false;
 			break;
 		case computer:
+			cout << endl << endl << "computer turn" << endl;
+
 			for (int i = 0; i < 52; i++) {
-				sort(ComputerHand, ComputerHand + 51);
-				if (ComputerHand[i] != "empty") {
-					cout << ComputerHand[i] << endl;
+				quads = 0; // this is a counter, resetting it here
+
+				for (int j = i + 1; j < 51; j++) {
+					if (ComputerHand[i].at(0) != 'e') {
+						if (ComputerHand[i].at(0) == ComputerHand[j].at(0)) {
+							quads++;
+							if (quads == 3) {
+								match = ComputerHand[i].at(0);
+								computerscore++;
+								cout << "the computer got all 4! Culling cards and giving it a point" << endl;
+								for (int m = 0; m < 52; m++) {
+									if (ComputerHand[m].at(0) == match)
+										ComputerHand[m] = "empty";
+								}
+								cout << endl << "your new hand: " << endl;
+								for (int i = 0; i < 52; i++) {
+									if (ComputerHand[i].at(0) != 'e')
+										cout << ComputerHand[i] << endl;
+								}
+							}
+						}
+					}
 				}
+			} 
+			do {
+				notempty = false;
+				looking = rand() % 51;
+				if (ComputerHand[looking][0] != 'e')
+					notempty = true;
+			} while (notempty == false);
+			cout << "do you have " << ComputerHand[looking] << endl;
+
+			for (int i = 0; i < 52; i++) {
+				if (PlayerHand[i][0] == ComputerHand[looking][0]) {
+					cout << "the computer found a mach" << endl;
+					PlayerHand[i] = "empty";
+					PHandSize--;
+					MatchFound = true;
+				}
+				if (MatchFound == false) {
+					cout << "No Match found. GO FISH" << endl;
+					system("pause");
+					cout << "the computer grabbed a " << deck[NextDeckCard] << endl;
+					ComputerHand[CHandSize] = deck[NextDeckCard];
+					CHandSize++;
+					NextDeckCard++;
+					turn = player;
+					turnNumber++;
+				}
+				else
+					MatchFound = false;
+				break;
 			}
 			break;
 		}
+	}
+	if (Playerscore > computerscore) {
+		cout << "YOU WIN" << endl;
+	}
+	else if (Playerscore < computerscore) {
+		cout << "YOU LOST" << endl;
+	}
+	else if (Playerscore == computerscore) {
+		cout << "it was a tie" << endl;
 	}
 }
