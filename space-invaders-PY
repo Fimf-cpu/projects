@@ -1,5 +1,6 @@
 #Dean.k|3/7/25
 import pygame
+import random
 
 pygame.init()
 pygame.display.set_caption("space invaders!")
@@ -63,6 +64,26 @@ class Bullet:
         pygame.draw.rect(gamescreen, (250, 250, 250), (self.xpos, self.ypos, 3, 20))
 
 bullet = Bullet(xpos+28, ypos)
+
+class missile:
+    def __init__(self, xpos, ypos):
+        self.xpos = -10
+        self.ypos = -10
+        self.isalive = False
+    def move(self,):
+        if self.isalive == True:
+            self.ypos+=5
+        if self.ypos > 800:
+            self.isalive = False
+            self.xpos = -10
+            self.ypos = -10
+    def draw(self):
+        pygame.draw.rect(gamescreen, (250, 250, 250), (self.xpos, self.ypos, 3, 20))
+        pygame.draw.rect(gamescreen, (250, 250, 250), (self.xpos+2, self.ypos + 15, 10, 3))
+
+missiles = []
+for i in range (10):
+    missiles.append(missile(-10, -10))
 
 class Alien:
     def __init__(self, xpos, ypos):
@@ -139,6 +160,8 @@ while not fail:
     
     for i in range (len(armada)):
         timer = armada[i].move(timer)
+    for i in range (len(missiles)):
+        missiles[i].move()
     
     if shoot == True:
         bullet.isalive = True
@@ -160,6 +183,17 @@ while not fail:
         bullet.xpos = xpos + 28
         bullet.ypos = ypos
     
+    chance = random.randrange(100)
+    if chance < 2:
+        pick = random.randrange(len(armada))
+        if armada[pick].isAlive == True:
+            for i in range(len(missiles)):
+                if missiles.isalive == False:
+                    missiles[i].isalive == True
+                    missiles[i].xpos = armada[pick].xpos+5
+                    missiles[i].ypos = armada[pick].ypos
+                    break
+    
     #RENDER Section--------------------------------------=-=-=-=-=-=
     
     gamescreen.fill((0,0,0))
@@ -171,6 +205,9 @@ while not fail:
     for i in range (len(armada)):
         if armada[i].isAlive == True:
             armada[i].draw()
+    for i in range (len(missiles)):
+        if missiles[i].isalive == True:
+            missiles[i].draw()
     for j in range (len(walls)):
         walls[j].draw()
     
