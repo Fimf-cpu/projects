@@ -7,7 +7,7 @@ pygame.display.set_caption("space invaders!")
 gamescreen = pygame.display.set_mode((800,800))
 FPS = pygame.time.Clock()
 fail = False
-timer = 0;
+timer = 0
 
 #PLAYER variables
 xpos = 400
@@ -16,6 +16,7 @@ vx = 0
 moveleft = False
 moveright = False
 shoot = False
+lives = 3
 
 class wall:
     def __init__(self, xpos, ypos):
@@ -66,11 +67,11 @@ class Bullet:
 bullet = Bullet(xpos+28, ypos)
 
 class missile:
-    def __init__(self, xpos, ypos):
-        self.xpos = -10
-        self.ypos = -10
-        self.isalive = False
-    def move(self,):
+    def __init__(self, xpos, ypos, isalive):
+        self.xpos = xpos
+        self.ypos = ypos
+        self.isalive = isalive
+    def move(self):
         if self.isalive == True:
             self.ypos+=5
         if self.ypos > 800:
@@ -83,7 +84,7 @@ class missile:
 
 missiles = []
 for i in range (10):
-    missiles.append(missile(-10, -10))
+    missiles.append(missile(-10, -10, False))
 
 class Alien:
     def __init__(self, xpos, ypos):
@@ -122,7 +123,7 @@ for i in range (4):
         armada.append(Alien(j*80+50, i*80+50))
 
 #GAME LOOP----------------------------------------------------------
-while not fail:
+while lives != 0:
     FPS.tick(60)
     timer+=1
     
@@ -182,13 +183,27 @@ while not fail:
     else:
         bullet.xpos = xpos + 28
         bullet.ypos = ypos
+
+    for i in range(len(walls)):
+        for j in range(len(missiles)):
+            if missiles[j].isalive == True:
+                if walls[i].collide(missiles[j].xpos, missiles[j].ypos) == False:
+                    missiles[j].isalive = False
+                    break
     
+    for i in range (len(missiles)):
+        if missiles[i].isalive:
+            if missiles[i].xpos < xpos + 40:
+                if missiles[i].ypos < ypos + 40:
+                    if missiles[i].ypos < ypos:
+                        lives -= 1
+
     chance = random.randrange(100)
     if chance < 2:
         pick = random.randrange(len(armada))
         if armada[pick].isAlive == True:
             for i in range(len(missiles)):
-                if missiles.isalive == False:
+                if missiles[i].isalive == False:
                     missiles[i].isalive == True
                     missiles[i].xpos = armada[pick].xpos+5
                     missiles[i].ypos = armada[pick].ypos
